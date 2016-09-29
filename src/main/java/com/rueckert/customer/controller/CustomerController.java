@@ -62,7 +62,7 @@ public class CustomerController {
 		return savedCustomer;
 	}
 
-	private String getCustomerId() {
+	private static String getCustomerId() {
 		String id = UUID.randomUUID().toString();
 		return id;
 	}

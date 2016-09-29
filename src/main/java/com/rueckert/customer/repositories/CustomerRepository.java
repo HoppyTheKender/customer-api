@@ -7,4 +7,5 @@ import com.rueckert.customer.domain.Customer;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, String> {
+	// Intentionally left blank
 }
