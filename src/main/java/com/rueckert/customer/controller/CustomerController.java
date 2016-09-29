@@ -71,7 +71,7 @@ public class CustomerController {
 		try {
 			rabbitTemplate.convertAndSend(CloudConfig.CUSTOMER_TOPIC_NAME, null, id);
 		} catch (AmqpException e) {
-			logger.error("An exception occured trying to publish a message.", e);
+			logger.error("An exception occurred trying to publish a message.", e);
 		}
 	}
 
