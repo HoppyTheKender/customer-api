@@ -40,6 +40,9 @@ public class CustomerController {
 	@RequestMapping(value = "/customer", method = RequestMethod.GET)
 	@ResponseStatus(code = HttpStatus.OK)
 	public Iterable<Customer> getCustomers() {
+		String vcapApplication = System.getenv("VCAP_APPLICATION");
+		logger.info(vcapApplication);
+		
 		return repository.findAll();
 	}
 
