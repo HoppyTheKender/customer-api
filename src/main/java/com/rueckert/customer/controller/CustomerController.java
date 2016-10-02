@@ -1,5 +1,6 @@
 package com.rueckert.customer.controller;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.*;
 import com.rueckert.customer.config.CloudConfig;
 import com.rueckert.customer.domain.Customer;
 
@@ -26,6 +28,7 @@ public class CustomerController {
 	
 	private CrudRepository<Customer, String> repository;
 	private RabbitTemplate rabbitTemplate;
+	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Autowired
 	public void setRepository(CrudRepository<Customer, String> repository) {
@@ -40,15 +43,29 @@ public class CustomerController {
 	@RequestMapping(value = "/customer", method = RequestMethod.GET)
 	@ResponseStatus(code = HttpStatus.OK)
 	public Iterable<Customer> getCustomers() {
-		String vcapApplication = System.getenv("VCAP_APPLICATION");
-		logger.info(vcapApplication);
+		String instanceIndex = retrieveInstanceIndex();
+		logger.info(String.format("Instance Index {%s}", instanceIndex));
 		
 		return repository.findAll();
+	}
+
+	private String retrieveInstanceIndex() {
+		String vcapApplication = System.getenv("VCAP_APPLICATION");
+		try {
+			JsonNode jsonNode = objectMapper.readValue(vcapApplication, JsonNode.class);
+			JsonNode instanceIndex = jsonNode.get("instance_index");
+			return instanceIndex.asText();
+		} catch (IOException e) {
+			return "Unknown";
+		}
 	}
 
 	@RequestMapping(value = "/customer/{id}", method = RequestMethod.GET)
 	@ResponseStatus(code = HttpStatus.OK)
 	public Customer getCustomerById(@PathVariable String id) {
+		String instanceIndex = retrieveInstanceIndex();
+		logger.info(String.format("Instance Index {%s}", instanceIndex));
+		
 		return repository.findOne(id);
 	}
 
