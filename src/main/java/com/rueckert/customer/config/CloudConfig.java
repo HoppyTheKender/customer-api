@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cloud.config.java.AbstractCloudConfig;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,11 @@ public class CloudConfig extends AbstractCloudConfig {
 	@Bean
 	public DataSource dataSource() {
 		return connectionFactory().dataSource();
+	}
+
+	@Bean
+	public TopicExchange customerTopic() {
+		return new TopicExchange(CUSTOMER_TOPIC_NAME, true, false);
 	}
 
 	@Bean

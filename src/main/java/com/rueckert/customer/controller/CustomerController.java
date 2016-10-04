@@ -23,7 +23,7 @@ import com.rueckert.customer.domain.Customer;
 @ResponseStatus(value = HttpStatus.CREATED)
 public class CustomerController {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	private CrudRepository<Customer, String> repository;
 	private RabbitTemplate rabbitTemplate;
 
@@ -42,7 +42,7 @@ public class CustomerController {
 	public Iterable<Customer> getCustomers() {
 		String vcapApplication = System.getenv("VCAP_APPLICATION");
 		logger.info(vcapApplication);
-		
+
 		return repository.findAll();
 	}
 
@@ -59,7 +59,7 @@ public class CustomerController {
 		customer.setId(id);
 
 		Customer savedCustomer = repository.save(customer);
-		
+
 		publishMessage(id);
 
 		return savedCustomer;
@@ -69,7 +69,7 @@ public class CustomerController {
 		String id = UUID.randomUUID().toString();
 		return id;
 	}
-	
+
 	private void publishMessage(String id) {
 		try {
 			rabbitTemplate.convertAndSend(CloudConfig.CUSTOMER_TOPIC_NAME, null, id);
@@ -84,7 +84,7 @@ public class CustomerController {
 		customer.setId(id);
 
 		Customer savedCustomer = repository.save(customer);
-		
+
 		publishMessage(id);
 
 		return savedCustomer;
