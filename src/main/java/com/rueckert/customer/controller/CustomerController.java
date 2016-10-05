@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,21 +16,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rueckert.customer.config.CloudConfig;
 import com.rueckert.customer.domain.Customer;
+import com.rueckert.customer.repositories.CustomerRepository;
 
 @RestController
 @ResponseStatus(value = HttpStatus.CREATED)
 public class CustomerController {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private CrudRepository<Customer, String> repository;
+	private CustomerRepository repository;
 	private RabbitTemplate rabbitTemplate;
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Autowired
-	public void setRepository(CrudRepository<Customer, String> repository) {
+	public void setRepository(CustomerRepository repository) {
 		this.repository = repository;
 	}
 
@@ -45,7 +46,7 @@ public class CustomerController {
 	public Iterable<Customer> getCustomers() {
 		String instanceIndex = retrieveInstanceIndex();
 		logger.info(String.format("Instance Index {%s}", instanceIndex));
-		
+
 		return repository.findAll();
 	}
 
@@ -65,7 +66,7 @@ public class CustomerController {
 	public Customer getCustomerById(@PathVariable String id) {
 		String instanceIndex = retrieveInstanceIndex();
 		logger.info(String.format("Instance Index {%s}", instanceIndex));
-		
+
 		return repository.findOne(id);
 	}
 
@@ -80,6 +81,15 @@ public class CustomerController {
 		publishMessage(id);
 
 		return savedCustomer;
+	}
+	
+	@RequestMapping(value = "/customer/lastname/{lastName}", method = RequestMethod.GET)
+	@ResponseStatus(code = HttpStatus.OK)
+	public Iterable<Customer> getCustomerByLastName(@PathVariable String lastName) {
+		String instanceIndex = retrieveInstanceIndex();
+		logger.info(String.format("Instance Index {%s}", instanceIndex));
+
+		return repository.findByLastName(lastName);
 	}
 
 	private static String getCustomerId() {
