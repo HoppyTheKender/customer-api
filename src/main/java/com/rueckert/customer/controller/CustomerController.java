@@ -45,6 +45,7 @@ public class CustomerController {
 	@ResponseStatus(code = HttpStatus.OK)
 	public Iterable<Customer> getCustomers() {
 		String instanceIndex = retrieveInstanceIndex();
+		logger.info(String.format("Current version {%s}", "6"));
 		logger.info(String.format("Instance Index {%s}", instanceIndex));
 
 		return repository.findAll();
