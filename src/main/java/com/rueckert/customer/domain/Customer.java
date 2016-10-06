@@ -11,6 +11,7 @@ public class Customer {
 	public String id;
 	public String firstName;
 	public String lastName;
+	public String addressLine1;
 	public String email;
 
 	public String getId() {
@@ -35,6 +36,14 @@ public class Customer {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+	
+	public String getAddressLine1() {
+		return addressLine1;
+	}
+
+	public void setAddressLine1(String addressLine1) {
+		this.addressLine1 = addressLine1;
 	}
 
 	public String getEmail() {
