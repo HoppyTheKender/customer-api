@@ -1,0 +1,11 @@
+---
+applications:
+- name: customer-api
+  memory: 512M
+  disk_quota: 512M
+  instances: 1
+  env:
+    hibernate_dialect: org.hibernate.dialect.PostgreSQLDialect
+  services:
+    - customer-rabbit-mq
+    - customer-api-elphant-db
