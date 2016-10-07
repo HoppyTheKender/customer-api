@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,13 +34,11 @@ public class CustomerController {
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Autowired
-	public void setRepository(CustomerRepository repository) {
-		this.repository = repository;
-	}
+	public CustomerController(RabbitAdmin rabbitAdmin, Exchange exchange) {
+		rabbitAdmin.declareExchange(exchange);
+		this.rabbitTemplate = rabbitAdmin.getRabbitTemplate();
 
-	@Autowired
-	public void setRabbitTemplate(RabbitTemplate rabbitTemplate) {
-		this.rabbitTemplate = rabbitTemplate;
+		rabbitTemplate.setExchange(exchange.getName());
 	}
 
 	@RequestMapping(value = "/customer", method = RequestMethod.GET)
@@ -82,7 +82,7 @@ public class CustomerController {
 
 		return savedCustomer;
 	}
-	
+
 	@RequestMapping(value = "/customer/lastname/{lastName}", method = RequestMethod.GET)
 	@ResponseStatus(code = HttpStatus.OK)
 	public Iterable<Customer> getCustomerByLastName(@PathVariable String lastName) {
