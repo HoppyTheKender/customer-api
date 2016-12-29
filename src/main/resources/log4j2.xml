@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration packages="com.fedex.framework.logging.log4j2">
+	<Appenders>
+		<Console name="rootLogAppender">
+			<PatternLayout pattern="%-5level %d [%t] %c:%M(%L): %m%n" />
+		</Console>
+	</Appenders>
+	
+	<Loggers>
+		<Root level="info">
+			<AppenderRef ref="rootLogAppender"/>
+		</Root>
+	</Loggers>
+</Configuration>
