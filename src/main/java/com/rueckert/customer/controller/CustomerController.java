@@ -34,7 +34,9 @@ public class CustomerController {
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Autowired
-	public CustomerController(RabbitAdmin rabbitAdmin, Exchange exchange) {
+	public CustomerController(CustomerRepository repository, RabbitAdmin rabbitAdmin, Exchange exchange) {
+		this.repository = repository;
+
 		rabbitAdmin.declareExchange(exchange);
 		this.rabbitTemplate = rabbitAdmin.getRabbitTemplate();
 
