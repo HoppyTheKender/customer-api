@@ -1,6 +1,7 @@
 package com.rueckert.customer.persistence;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.rueckert.customer.domain.Customer;
 import com.rueckert.customer.repositories.CustomerRepository;
@@ -19,7 +20,9 @@ public class CustomerPersistenceJpaImpl implements CustomerPersistence {
 
 	@Override
 	public Customer retrieveCustomerByCustomerId(String id) {
-		return repository.findOne(id);
+		Optional<Customer> optionalCustomer = repository.findById(id);
+
+		return optionalCustomer.get();
 	}
 
 	@Override
@@ -39,6 +42,6 @@ public class CustomerPersistenceJpaImpl implements CustomerPersistence {
 
 	@Override
 	public void deleteCustomerByCustomerId(String id) {
-		repository.delete(id);
+		repository.deleteById(id);
 	}
 }
