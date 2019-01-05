@@ -90,6 +90,13 @@
 			<scope>runtime</scope>
 		</dependency>
 		
+		<!-- Firebase -->
+		<dependency>
+		  <groupId>com.google.firebase</groupId>
+		  <artifactId>firebase-admin</artifactId>
+		  <version>6.6.0</version>
+		</dependency>
+		
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

@@ -5,10 +5,6 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,27 +16,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rueckert.customer.config.CloudConfig;
 import com.rueckert.customer.domain.Customer;
-import com.rueckert.customer.repositories.CustomerRepository;
+import com.rueckert.customer.notifier.CustomerChangeNotifier;
+import com.rueckert.customer.persistence.CustomerPersistence;
 
 @RestController
-@ResponseStatus(value = HttpStatus.CREATED)
 public class CustomerController {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private CustomerRepository repository;
-	private RabbitTemplate rabbitTemplate;
+	private CustomerPersistence customerPersistence;
+	private CustomerChangeNotifier customerChangeNotifier;
+
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@Autowired
-	public CustomerController(CustomerRepository repository, RabbitAdmin rabbitAdmin, Exchange exchange) {
-		this.repository = repository;
-
-		rabbitAdmin.declareExchange(exchange);
-		this.rabbitTemplate = rabbitAdmin.getRabbitTemplate();
-
-		rabbitTemplate.setExchange(exchange.getName());
+	public CustomerController(CustomerPersistence customerPersistence, CustomerChangeNotifier customerChangeNotifier) {
+		this.customerPersistence = customerPersistence;
+		this.customerChangeNotifier = customerChangeNotifier;
 	}
 
 	@RequestMapping(value = "/customer", method = RequestMethod.GET)
@@ -50,7 +42,7 @@ public class CustomerController {
 		logger.info(String.format("Current version {%s}", "10"));
 		logger.info(String.format("Instance Index {%s}", instanceIndex));
 
-		return repository.findAll();
+		return customerPersistence.retrieveAllCustomers();
 	}
 
 	private String retrieveInstanceIndex() {
@@ -70,7 +62,7 @@ public class CustomerController {
 		String instanceIndex = retrieveInstanceIndex();
 		logger.info(String.format("Instance Index {%s}", instanceIndex));
 
-		return repository.findOne(id);
+		return customerPersistence.retrieveCustomerByCustomerId(id);
 	}
 
 	@RequestMapping(value = "/customer", method = RequestMethod.POST)
@@ -79,7 +71,7 @@ public class CustomerController {
 		String id = getCustomerId();
 		customer.setId(id);
 
-		Customer savedCustomer = repository.save(customer);
+		Customer savedCustomer = customerPersistence.createCustomer(customer);
 
 		publishMessage(id);
 
@@ -92,7 +84,7 @@ public class CustomerController {
 		String instanceIndex = retrieveInstanceIndex();
 		logger.info(String.format("Instance Index {%s}", instanceIndex));
 
-		return repository.findByLastName(lastName);
+		return customerPersistence.retrieveCustomersByLastName(lastName);
 	}
 
 	private static String getCustomerId() {
@@ -101,11 +93,7 @@ public class CustomerController {
 	}
 
 	private void publishMessage(String id) {
-		try {
-			rabbitTemplate.convertAndSend(CloudConfig.CUSTOMER_TOPIC_NAME, null, id);
-		} catch (AmqpException e) {
-			logger.error("An exception occurred trying to publish a message.", e);
-		}
+		customerChangeNotifier.sendNotification(id);
 	}
 
 	@RequestMapping(value = "/customer/{id}", method = RequestMethod.PUT)
@@ -113,7 +101,7 @@ public class CustomerController {
 	public Customer updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
 		customer.setId(id);
 
-		Customer savedCustomer = repository.save(customer);
+		Customer savedCustomer = customerPersistence.updateCustomer(customer);
 
 		publishMessage(id);
 
@@ -123,6 +111,6 @@ public class CustomerController {
 	@RequestMapping(value = "/customer/{id}", method = RequestMethod.DELETE)
 	@ResponseStatus(code = HttpStatus.OK)
 	public void deleteCustomer(@PathVariable String id) {
-		repository.delete(id);
+		customerPersistence.deleteCustomerByCustomerId(id);
 	}
 }
