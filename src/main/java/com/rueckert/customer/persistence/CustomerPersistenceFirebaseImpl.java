@@ -13,6 +13,7 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.WriteResult;
 import com.rueckert.customer.domain.Customer;
 
 public class CustomerPersistenceFirebaseImpl implements CustomerPersistence {
@@ -93,12 +94,18 @@ public class CustomerPersistenceFirebaseImpl implements CustomerPersistence {
 	}
 
 	private Customer saveCustomer(Customer customer) {
-		DocumentReference documentReference = firstoreDatabase.collection(CUSTOMER_COLLECTION_NAME)
-				.document(customer.id);
-
 		Map<String, Object> customerMap = createCustomerMap(customer);
+		
+		DocumentReference documentReference = firstoreDatabase.collection(CUSTOMER_COLLECTION_NAME)
+				.document(customer.getId());
 
-		documentReference.set(customerMap);
+		ApiFuture<WriteResult> future = documentReference.set(customerMap);
+		
+		try {
+			future.get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new IllegalStateException("Could not save customer.", e);
+		}
 
 		return customer;
 	}
@@ -106,11 +113,11 @@ public class CustomerPersistenceFirebaseImpl implements CustomerPersistence {
 	private Map<String, Object> createCustomerMap(Customer customer) {
 		Map<String, Object> customerMap = new HashMap<>();
 
-		customerMap.put("firstName", customer.firstName);
-		customerMap.put("lastName", customer.lastName);
-		customerMap.put("addressLine1", customer.addressLine1);
-		customerMap.put("addressLine2", customer.addressLine2);
-		customerMap.put("email", customer.email);
+		customerMap.put("firstName", customer.getFirstName());
+		customerMap.put("lastName", customer.getLastName());
+		customerMap.put("addressLine1", customer.getAddressLine1());
+		customerMap.put("addressLine2", customer.getAddressLine2());
+		customerMap.put("email", customer.getEmail());
 
 		return customerMap;
 	}

@@ -8,12 +8,12 @@ import javax.persistence.Id;
 public class Customer {
 	@Id
 	@Column(length = 36)
-	public String id;
-	public String firstName;
-	public String lastName;
-	public String addressLine1;
-	public String addressLine2;
-	public String email;
+	private String id;
+	private String firstName;
+	private String lastName;
+	private String addressLine1;
+	private String addressLine2;
+	private String email;
 
 	public String getId() {
 		return id;
