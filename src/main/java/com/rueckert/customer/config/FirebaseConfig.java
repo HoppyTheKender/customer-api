@@ -25,7 +25,7 @@ public class FirebaseConfig {
 	}
 	
 	@Bean
-	private Firestore firstoreDatabase() throws IOException {
+	public Firestore firstoreDatabase() throws IOException {
 		GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
 		FirebaseOptions options = new FirebaseOptions.Builder()
 		    .setCredentials(credentials)
