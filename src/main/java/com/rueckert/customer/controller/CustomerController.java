@@ -51,7 +51,7 @@ public class CustomerController {
 			JsonNode jsonNode = objectMapper.readValue(vcapApplication, JsonNode.class);
 			JsonNode instanceIndex = jsonNode.get("instance_index");
 			return instanceIndex.asText();
-		} catch (IOException e) {
+		} catch (IOException | NullPointerException e) {
 			return "Unknown";
 		}
 	}
